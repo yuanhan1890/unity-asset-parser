@@ -1,9 +1,11 @@
 "use strict";
 var fs = require('fs');
+var pathLib = require('path');
 var stringify = require('json-stringify-pretty-compact');
 // const jsYaml = require('js-yaml');
 var get = require('lodash/get');
 var data = require('/Users/dt1234/Downloads/assets_bad_north/TowerDefense.json');
+var guidDict = require('/Users/dt1234/Downloads/assets_bad_north/metaLookup.json');
 var Avl = require('avl');
 var ObjectById = new Avl();
 var GameObjectById = new Avl();
@@ -84,6 +86,28 @@ var rootGameObjectKeys = Object.keys(dict).filter(function (key) {
 function getName(key) {
     return data[ObjectById.find(key).data].def.GameObject.m_Name;
 }
+function getFn(fnKey) {
+    var comp = data[ObjectById.find(fnKey).data].def;
+    var isMonoBehaviour = get(comp, 'MonoBehaviour');
+    if (!isMonoBehaviour) {
+        return {
+            key: Object.keys(comp)[0],
+            id: fnKey,
+        };
+    }
+    var scriptGuid = get(comp, 'MonoBehaviour.m_Script.guid');
+    var script = guidDict[scriptGuid];
+    if (!script) {
+        return {
+            key: 'UnityScript',
+            id: fnKey,
+        };
+    }
+    return {
+        key: script,
+        id: fnKey,
+    };
+}
 function constructTree(keys) {
     var tree = [];
     keys.forEach(function (key) {
@@ -91,7 +115,7 @@ function constructTree(keys) {
             children: recur(key),
             name: getName(key),
             id: key,
-            fn: dict[key].fn,
+            fn: dict[key].fn.map(getFn),
         });
     });
     return tree;
@@ -102,11 +126,11 @@ function recur(key) {
             children: recur(key),
             name: getName(key),
             id: key,
-            fn: dict[key].fn,
+            fn: dict[key].fn.map(getFn),
         };
     });
 }
 var Tree = constructTree(rootGameObjectKeys);
-fs.writeFileSync('/Users/dt1234/Downloads/assets_bad_north/TowerDefenseScene.json', stringify(Tree));
+fs.writeFileSync('/Users/dt1234/Downloads/assets_bad_north/TowerDefenseScene.json', stringify(Tree, { maxLength: 120 }));
 // fs.writeFileSync('/Users/dt1234/Downloads/assets_bad_north/TowerDefenseScene.yaml', jsYaml.dump(Tree));
 //# sourceMappingURL=createTree.js.map

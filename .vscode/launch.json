@@ -12,7 +12,7 @@
         "<node_internals>/**"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
-      "program": "${workspaceFolder}/createTree.js"
+      "program": "${workspaceFolder}/createMetaLookup.js"
     }
     {
       "type": "node",

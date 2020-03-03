@@ -1,8 +1,10 @@
 const fs = require('fs');
+const pathLib = require('path');
 const stringify = require('json-stringify-pretty-compact');
 // const jsYaml = require('js-yaml');
 const get = require('lodash/get');
 const data: any = require('/Users/dt1234/Downloads/assets_bad_north/TowerDefense.json');
+const guidDict: any = require('/Users/dt1234/Downloads/assets_bad_north/metaLookup.json');
 const Avl = require('avl');
 
 const ObjectById = new Avl();
@@ -98,6 +100,34 @@ function getName(key: string) {
   return data[ObjectById.find(key).data].def.GameObject.m_Name;
 }
 
+function getFn(fnKey: string) {
+  const comp = data[ObjectById.find(fnKey).data].def;
+
+  const isMonoBehaviour = get(comp, 'MonoBehaviour');
+
+  if (!isMonoBehaviour) {
+    return {
+      key: Object.keys(comp)[0],
+      id: fnKey,
+    };
+  }
+
+  const scriptGuid = get(comp, 'MonoBehaviour.m_Script.guid');
+  const script = guidDict[scriptGuid];
+
+  if (!script) {
+    return {
+      key: 'UnityScript',
+      id: fnKey,
+    };
+  }
+
+  return {
+    key: script,
+    id: fnKey,
+  };
+}
+
 function constructTree(keys: string[]) {
   const tree: any[] = [];
   keys.forEach((key) => {
@@ -105,7 +135,7 @@ function constructTree(keys: string[]) {
       children: recur(key),
       name: getName(key),
       id: key,
-      fn: dict[key].fn,
+      fn: dict[key].fn.map(getFn),
     });
   });
 
@@ -118,12 +148,12 @@ function recur(key: string): any {
       children: recur(key),
       name: getName(key),
       id: key,
-      fn: dict[key].fn,
+      fn: dict[key].fn.map(getFn),
     };
   });
 }
 
 const Tree = constructTree(rootGameObjectKeys);
 
-fs.writeFileSync('/Users/dt1234/Downloads/assets_bad_north/TowerDefenseScene.json', stringify(Tree));
+fs.writeFileSync('/Users/dt1234/Downloads/assets_bad_north/TowerDefenseScene.json', stringify(Tree, { maxLength: 120 }));
 // fs.writeFileSync('/Users/dt1234/Downloads/assets_bad_north/TowerDefenseScene.yaml', jsYaml.dump(Tree));

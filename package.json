@@ -21,6 +21,7 @@
   "dependencies": {
     "antd": "^4.0.0",
     "avl": "^1.4.4",
+    "folder-walker": "^3.2.0",
     "js-yaml": "^3.13.1",
     "json-stringify-pretty-compact": "^2.0.0",
     "lodash": "^4.17.15",
