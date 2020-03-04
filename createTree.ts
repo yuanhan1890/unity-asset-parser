@@ -86,6 +86,8 @@ GameObjectById.forEach((node: any) => {
         }
         dict[node.key].children.push(id + '');
       });
+
+      dict[node.key].fn.push(fileId);
     } else {
       dict[node.key].fn.push(fileId);
     }
