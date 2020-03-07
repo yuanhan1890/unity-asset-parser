@@ -3,6 +3,7 @@ import walker from 'folder-walker';
 import pathLib from 'path';
 import fs from 'fs';
 import stringify from 'json-stringify-pretty-compact';
+import { assetPath, assetMetaLookupPath } from './path';
 
 interface IWalker {
   basename: string; // "decompile-bad-north"
@@ -14,8 +15,7 @@ interface IWalker {
 }
 
 function main() {
-
-  const path = '/Users/dt1234/Downloads/assets_bad_north';
+  const path = assetPath;
   const stream = walker([path]);
 
   const dict: any = {};
@@ -28,7 +28,7 @@ function main() {
   });
 
   stream.on('end', () => {
-    fs.writeFileSync('/Users/dt1234/Downloads/assets_bad_north/metaLookup.json', stringify(dict, { maxLength: 120 }));
+    fs.writeFileSync(assetMetaLookupPath, stringify(dict, { maxLength: 120 }));
     console.log('done');
   });
 }

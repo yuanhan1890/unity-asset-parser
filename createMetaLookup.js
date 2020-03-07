@@ -8,8 +8,9 @@ var folder_walker_1 = __importDefault(require("folder-walker"));
 var path_1 = __importDefault(require("path"));
 var fs_1 = __importDefault(require("fs"));
 var json_stringify_pretty_compact_1 = __importDefault(require("json-stringify-pretty-compact"));
+var path_2 = require("./path");
 function main() {
-    var path = '/Users/dt1234/Downloads/assets_bad_north';
+    var path = path_2.assetPath;
     var stream = folder_walker_1.default([path]);
     var dict = {};
     stream.on('data', function (data) {
@@ -19,7 +20,7 @@ function main() {
         }
     });
     stream.on('end', function () {
-        fs_1.default.writeFileSync('/Users/dt1234/Downloads/assets_bad_north/metaLookup.json', json_stringify_pretty_compact_1.default(dict, { maxLength: 120 }));
+        fs_1.default.writeFileSync(path_2.assetMetaLookupPath, json_stringify_pretty_compact_1.default(dict, { maxLength: 120 }));
         console.log('done');
     });
 }
