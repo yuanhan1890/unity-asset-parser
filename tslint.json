@@ -7,7 +7,9 @@
     "jsRules": {},
     "rules": {
         "import-name": false,
-        "function-name": false
+        "function-name": false,
+        "variable-name": false,
+        "prefer-for-of": false
     },
     "rulesDirectory": []
 }

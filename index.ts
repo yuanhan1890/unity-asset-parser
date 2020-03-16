@@ -14,7 +14,7 @@ function compile(path: string) {
     objects.push({
       uType: test[i],
       fileID: test[i + 1],
-      def: jsYaml.load(test[i + 2]),
+      def: jsYaml.load(test[i + 2].replace(/(?!:fileID: )(\d+)\}/g, '"$1"}')),
     });
   }
 

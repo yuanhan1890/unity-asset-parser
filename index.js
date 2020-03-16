@@ -15,7 +15,7 @@ function compile(path) {
         objects.push({
             uType: test[i],
             fileID: test[i + 1],
-            def: js_yaml_1.default.load(test[i + 2]),
+            def: js_yaml_1.default.load(test[i + 2].replace(/(?!:fileID: )(\d+)\}/g, '"$1"}')),
         });
     }
     createTree_1.createTree(path, objects);

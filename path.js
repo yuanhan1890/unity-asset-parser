@@ -4,7 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var path_1 = __importDefault(require("path"));
-exports.scenePath = 'D:\\unity-decompile\\badnorth-assets\\BadNorth\\Assets\\Scene\\Modules\\Modules.unity';
-exports.assetPath = 'D:\\unity-decompile\\badnorth-assets\\BadNorth';
+exports.prefabPath = '/Users/dt1234/Downloads/assets_bad_north/BadNorth/Assets/PrefabInstance/CampaignPrefab.prefab';
+exports.scenePath = '/Users/dt1234/Downloads/assets_bad_north/BadNorth/Assets/Scene/TowerDefense/Medieval/Campaign/CampaignGeneration.unity';
+exports.assetPath = '/Users/dt1234/Downloads/assets_bad_north/BadNorth';
 exports.assetMetaLookupPath = path_1.default.join(exports.assetPath, 'metaLookup.json');
 //# sourceMappingURL=path.js.map

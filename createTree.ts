@@ -139,6 +139,7 @@ export function createTree(dataPath: string, data: any) {
       tree.push({
         children: recur(key),
         name: getName(key),
+        endName: getName(key),
         id: key,
         fn: dict[key].fn.map(getFn),
       });
@@ -152,6 +153,7 @@ export function createTree(dataPath: string, data: any) {
       return {
         children: recur(key),
         name: getName(key),
+        endName: getName(key),
         id: key,
         fn: dict[key].fn.map(getFn),
       };

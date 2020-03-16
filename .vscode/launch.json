@@ -8,12 +8,13 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Tree",
+      "runtimeVersion": "12.16.1",
       "skipFiles": [
         "<node_internals>/**"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
-      "program": "${workspaceFolder}/createMetaLookup.js"
-    }
+      "program": "${workspaceFolder}/createPrefab.js"
+    },
     {
       "type": "node",
       "request": "launch",
