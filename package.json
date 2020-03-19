@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-meta": "cross-env tsc && node createMetaLookup.js",
-    "create-scene": "cross-env tsc && node index.js",
-    "create-prefab": "cross-env tsc && node createPrefab.js"
+    "create-prefab": "cross-env tsc && node createPrefab.js",
+    "build": "cross-env tsc && node createMetaLookup.js && node createPrefab"
   },
   "keywords": [],
   "author": "",
