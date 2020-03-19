@@ -2,13 +2,22 @@ import fs from 'fs';
 import pathLib from 'path';
 import jsYaml from 'js-yaml';
 import stringify from 'json-stringify-pretty-compact';
-import { prefabPath, assetMetaLookupPath } from './path';
-
+import walker from 'folder-walker';
+import { assetPath, assetMetaLookupPath } from './path';
 const guidDict: any = require(assetMetaLookupPath);
+
+interface IWalker {
+  basename: string; // "decompile-bad-north"
+  filepath: string; // "/Users/dt1234/Downloads/assets_bad_north/decompile-bad-north"
+  relname: string; // "decompile-bad-north"
+  root: string; // "/Users/dt1234/Downloads/assets_bad_north"
+  stat: any; // Stats {dev: 16777220, mode: 16877, nlink: 223, …}
+  type: 'directory' | 'file';
+}
 
 function Parse(dataPath: string) {
 
-  const str = fs.readFileSync(prefabPath, { encoding: 'utf-8' });
+  const str = fs.readFileSync(dataPath, { encoding: 'utf-8' });
 
   const  lines = str.split(/---\s+\!u\!(\d+)\s+\&(\d+)/g);
   const IdDict = {} as { [key in string]: any };
@@ -120,4 +129,26 @@ function Parse(dataPath: string) {
   );
 }
 
-Parse(prefabPath);
+function main() {
+  const path = assetPath;
+  const stream = walker([path]);
+
+  const dict: any = {};
+
+  stream.on('data', (data: IWalker) => {
+    if (data.type === 'file') {
+      const extname = pathLib.extname(data.filepath);
+      if (extname === '.unity' || extname === '.prefab') {
+        Parse(data.filepath);
+        console.log('complete: ' + data.filepath);
+      }
+    }
+  });
+
+  stream.on('end', () => {
+    fs.writeFileSync(assetMetaLookupPath, stringify(dict, { maxLength: 120 }));
+    console.log('done');
+  });
+}
+
+main();

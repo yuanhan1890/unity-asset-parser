@@ -7,10 +7,11 @@ var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var js_yaml_1 = __importDefault(require("js-yaml"));
 var json_stringify_pretty_compact_1 = __importDefault(require("json-stringify-pretty-compact"));
+var folder_walker_1 = __importDefault(require("folder-walker"));
 var path_2 = require("./path");
 var guidDict = require(path_2.assetMetaLookupPath);
 function Parse(dataPath) {
-    var str = fs_1.default.readFileSync(path_2.prefabPath, { encoding: 'utf-8' });
+    var str = fs_1.default.readFileSync(dataPath, { encoding: 'utf-8' });
     var lines = str.split(/---\s+\!u\!(\d+)\s+\&(\d+)/g);
     var IdDict = {};
     for (var i = 1; i < lines.length; i += 3) {
@@ -95,5 +96,23 @@ function Parse(dataPath) {
     var writeResultName = path_1.default.basename(dataPath).replace(path_1.default.extname(dataPath), '');
     fs_1.default.writeFileSync(path_1.default.join(writeDist, writeResultName + ".json"), json_stringify_pretty_compact_1.default(tree, { maxLength: 120 }));
 }
-Parse(path_2.prefabPath);
+function main() {
+    var path = path_2.assetPath;
+    var stream = folder_walker_1.default([path]);
+    var dict = {};
+    stream.on('data', function (data) {
+        if (data.type === 'file') {
+            var extname = path_1.default.extname(data.filepath);
+            if (extname === '.unity' || extname === '.prefab') {
+                Parse(data.filepath);
+                console.log('complete: ' + data.filepath);
+            }
+        }
+    });
+    stream.on('end', function () {
+        fs_1.default.writeFileSync(path_2.assetMetaLookupPath, json_stringify_pretty_compact_1.default(dict, { maxLength: 120 }));
+        console.log('done');
+    });
+}
+main();
 //# sourceMappingURL=createPrefab.js.map
