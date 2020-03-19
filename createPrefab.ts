@@ -31,10 +31,10 @@ function Parse(dataPath: string) {
   // console.log(Object.values);
   Object.keys(IdDict).forEach((key) => {
     const data = IdDict[key];
+    const typeKey = Object.keys(data)[0];
+    data[typeKey].__id = key;
     if (data.GameObject) {
       const gameobject = data.GameObject;
-
-      gameobject.__id = key;
       const components = gameobject.m_Component;
 
       for (let i = 0; i < components.length; i += 1) {
@@ -102,10 +102,12 @@ function Parse(dataPath: string) {
 
         fn.push({
           script,
+          id: monoBehaviour.__id,
           name: compName,
         });
       } else {
         fn.push({
+          id: comp[Object.keys(comp)[0]].__id,
           name: compName,
         });
       }

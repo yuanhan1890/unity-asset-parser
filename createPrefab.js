@@ -21,9 +21,10 @@ function Parse(dataPath) {
     // console.log(Object.values);
     Object.keys(IdDict).forEach(function (key) {
         var data = IdDict[key];
+        var typeKey = Object.keys(data)[0];
+        data[typeKey].__id = key;
         if (data.GameObject) {
             var gameobject = data.GameObject;
-            gameobject.__id = key;
             var components = gameobject.m_Component;
             for (var i = 0; i < components.length; i += 1) {
                 var compFileId = components[i].component.fileID;
@@ -75,11 +76,13 @@ function Parse(dataPath) {
                 var script = guidDict[guid];
                 fn.push({
                     script: script,
+                    id: monoBehaviour.__id,
                     name: compName,
                 });
             }
             else {
                 fn.push({
+                    id: comp[Object.keys(comp)[0]].__id,
                     name: compName,
                 });
             }
