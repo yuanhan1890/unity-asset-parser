@@ -18,6 +18,7 @@ function Parse(dataPath) {
         IdDict[lines[i + 1]] = js_yaml_1.default.load(lines[i + 2].replace(/(?!:fileID: )(\d+)\}/g, '"$1"}'));
     }
     var TopGameObjects = [];
+    var fileIdMapper = {};
     // console.log(Object.values);
     Object.keys(IdDict).forEach(function (key) {
         var data = IdDict[key];
@@ -83,6 +84,7 @@ function Parse(dataPath) {
                     properties: monoBehaviour,
                     loc: newParent.join(' > ') + (" > [" + compName + "]"),
                 });
+                fileIdMapper[monoBehaviour.__id] = newParent.join(' > ') + (" > [" + compName + "]");
             }
             else {
                 fn.push({
@@ -91,9 +93,10 @@ function Parse(dataPath) {
                     properties: comp[Object.keys(comp)[0]],
                     loc: newParent.join(' > ') + (" > [" + compName + "]"),
                 });
+                fileIdMapper[comp[Object.keys(comp)[0]].__id] = newParent.join(' > ') + (" > [" + compName + "]");
             }
         });
-        return {
+        var result = {
             id: __id,
             fn: fn.length === 0 ? undefined : fn,
             children: children.length === 0 ? undefined : children,
@@ -101,9 +104,43 @@ function Parse(dataPath) {
             endName: m_Name,
             loc: newParent.join(' > '),
         };
+        fileIdMapper[result.id] = result.loc;
+        return result;
+    }
+    function resolveFildId(object) {
+        if (Array.isArray(object)) {
+            object.forEach(function (child) {
+                resolveFildId(child);
+            });
+            return;
+        }
+        if (typeof object === 'object' && object) {
+            var keys = Object.keys(object);
+            for (var i = 0; i < keys.length; i += 1) {
+                var key = keys[i];
+                var value = object[key];
+                if (key === 'fileID') {
+                    var loc = fileIdMapper[value];
+                    if (loc) {
+                        object.fileID = { id: value, loc: loc };
+                    }
+                }
+                else if (key === 'guid') {
+                    var loc = guidDict[value];
+                    if (loc) {
+                        object.guid = { guid: value, loc: loc };
+                    }
+                }
+                else if (typeof value !== 'string') {
+                    resolveFildId(value);
+                }
+            }
+            return;
+        }
     }
     var writeDist = path_1.default.dirname(dataPath);
     var writeResultName = path_1.default.basename(dataPath).replace(path_1.default.extname(dataPath), '');
+    resolveFildId(tree);
     fs_1.default.writeFileSync(path_1.default.join(writeDist, writeResultName + ".json"), json_stringify_pretty_compact_1.default({ name: writeResultName, children: tree }, { maxLength: 120 }));
 }
 function main() {
@@ -122,7 +159,6 @@ function main() {
         }
     });
     stream.on('end', function () {
-        fs_1.default.writeFileSync(path_2.assetMetaLookupPath, json_stringify_pretty_compact_1.default(dict, { maxLength: 120 }));
         console.log('done');
     });
 }

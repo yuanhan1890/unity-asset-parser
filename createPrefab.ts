@@ -28,6 +28,8 @@ function Parse(dataPath: string) {
 
   const TopGameObjects = [] as any[];
 
+  const fileIdMapper = {} as any;
+
   // console.log(Object.values);
   Object.keys(IdDict).forEach((key) => {
     const data = IdDict[key];
@@ -109,6 +111,7 @@ function Parse(dataPath: string) {
           properties: monoBehaviour,
           loc: newParent.join(' > ') + ` > [${compName}]`,
         });
+        fileIdMapper[monoBehaviour.__id] = newParent.join(' > ') + ` > [${compName}]`;
       } else {
         fn.push({
           id: comp[Object.keys(comp)[0]].__id,
@@ -116,10 +119,11 @@ function Parse(dataPath: string) {
           properties: comp[Object.keys(comp)[0]],
           loc: newParent.join(' > ') + ` > [${compName}]`,
         });
+        fileIdMapper[comp[Object.keys(comp)[0]].__id] = newParent.join(' > ') + ` > [${compName}]`;
       }
     });
 
-    return {
+    const result = {
       id: __id,
       fn: fn.length === 0 ? undefined : fn,
       children: children.length === 0 ? undefined : children,
@@ -127,10 +131,47 @@ function Parse(dataPath: string) {
       endName: m_Name,
       loc: newParent.join(' > '),
     };
+
+    fileIdMapper[result.id] = result.loc;
+
+    return result;
+  }
+
+  function resolveFildId(object: any): any {
+    if (Array.isArray(object)) {
+      object.forEach(child => {
+        resolveFildId(child);
+      });
+      return;
+    }
+
+    if (typeof object === 'object' && object) {
+      const keys = Object.keys(object);
+      for (let i = 0; i < keys.length; i += 1) {
+        const key = keys[i];
+        const value = object[key];
+        if (key === 'fileID') {
+          const loc = fileIdMapper[value];
+          if (loc) {
+            object.fileID = { id: value, loc };
+          }
+        } else if (key === 'guid') {
+          const loc = guidDict[value];
+          if (loc) {
+            object.guid = { guid: value, loc };
+          }
+        } else if (typeof value !== 'string') {
+          resolveFildId(value);
+        }
+      }
+      return;
+    }
   }
 
   const writeDist = pathLib.dirname(dataPath);
   const writeResultName = pathLib.basename(dataPath).replace(pathLib.extname(dataPath), '');
+
+  resolveFildId(tree);
 
   fs.writeFileSync(
     pathLib.join(writeDist, `${writeResultName}.json`),
@@ -158,7 +199,6 @@ function main() {
   });
 
   stream.on('end', () => {
-    fs.writeFileSync(assetMetaLookupPath, stringify(dict, { maxLength: 120 }));
     console.log('done');
   });
 }
