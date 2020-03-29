@@ -59,10 +59,10 @@ function Parse(dataPath: string) {
   const gameObjects = TopGameObjects;
 
   for (let i = 0; i < gameObjects.length; i += 1) {
-    tree.push(getGameObject(gameObjects[i]));
+    tree.push(getGameObject(gameObjects[i], []));
   }
 
-  function getGameObject(gameObject: any) {
+  function getGameObject(gameObject: any, parent: any) {
     const {
       __id,
       m_Component,
@@ -71,6 +71,9 @@ function Parse(dataPath: string) {
 
     const fn = [] as any[];
     const children = [] as any[];
+    const newParent = parent.slice();
+    newParent.push(m_Name);
+
     (m_Component || []).forEach(({ component: { fileID } }: any) => {
       const comp = IdDict[fileID];
       if (!comp) {
@@ -78,7 +81,6 @@ function Parse(dataPath: string) {
       }
 
       const compName = Object.keys(comp)[0];
-
       const transform = comp.Transform || comp.RectTransform;
       if (transform) {
         const childTransforms = transform.m_Children;
@@ -90,7 +92,7 @@ function Parse(dataPath: string) {
             const childGameObjectId = (childTransform.Transform || childTransform.RectTransform)
               .m_GameObject.fileID;
             const childGameObject = IdDict[childGameObjectId];
-            children.push(getGameObject(childGameObject.GameObject));
+            children.push(getGameObject(childGameObject.GameObject, newParent));
           }
         }
       }
@@ -105,12 +107,14 @@ function Parse(dataPath: string) {
           id: monoBehaviour.__id,
           name: compName,
           properties: monoBehaviour,
+          loc: newParent.join(' > ') + ` > [${compName}]`,
         });
       } else {
         fn.push({
           id: comp[Object.keys(comp)[0]].__id,
           name: compName,
           properties: comp[Object.keys(comp)[0]],
+          loc: newParent.join(' > ') + ` > [${compName}]`,
         });
       }
     });
@@ -121,6 +125,7 @@ function Parse(dataPath: string) {
       children: children.length === 0 ? undefined : children,
       name: m_Name,
       endName: m_Name,
+      loc: newParent.join(' > '),
     };
   }
 

@@ -43,12 +43,14 @@ function Parse(dataPath) {
     var tree = [];
     var gameObjects = TopGameObjects;
     for (var i = 0; i < gameObjects.length; i += 1) {
-        tree.push(getGameObject(gameObjects[i]));
+        tree.push(getGameObject(gameObjects[i], []));
     }
-    function getGameObject(gameObject) {
+    function getGameObject(gameObject, parent) {
         var __id = gameObject.__id, m_Component = gameObject.m_Component, m_Name = gameObject.m_Name;
         var fn = [];
         var children = [];
+        var newParent = parent.slice();
+        newParent.push(m_Name);
         (m_Component || []).forEach(function (_a) {
             var fileID = _a.component.fileID;
             var comp = IdDict[fileID];
@@ -66,7 +68,7 @@ function Parse(dataPath) {
                         var childGameObjectId = (childTransform.Transform || childTransform.RectTransform)
                             .m_GameObject.fileID;
                         var childGameObject = IdDict[childGameObjectId];
-                        children.push(getGameObject(childGameObject.GameObject));
+                        children.push(getGameObject(childGameObject.GameObject, newParent));
                     }
                 }
             }
@@ -79,6 +81,7 @@ function Parse(dataPath) {
                     id: monoBehaviour.__id,
                     name: compName,
                     properties: monoBehaviour,
+                    loc: newParent.join(' > ') + (" > [" + compName + "]"),
                 });
             }
             else {
@@ -86,6 +89,7 @@ function Parse(dataPath) {
                     id: comp[Object.keys(comp)[0]].__id,
                     name: compName,
                     properties: comp[Object.keys(comp)[0]],
+                    loc: newParent.join(' > ') + (" > [" + compName + "]"),
                 });
             }
         });
@@ -95,6 +99,7 @@ function Parse(dataPath) {
             children: children.length === 0 ? undefined : children,
             name: m_Name,
             endName: m_Name,
+            loc: newParent.join(' > '),
         };
     }
     var writeDist = path_1.default.dirname(dataPath);
