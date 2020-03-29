@@ -78,12 +78,14 @@ function Parse(dataPath) {
                     script: script,
                     id: monoBehaviour.__id,
                     name: compName,
+                    properties: monoBehaviour,
                 });
             }
             else {
                 fn.push({
                     id: comp[Object.keys(comp)[0]].__id,
                     name: compName,
+                    properties: comp[Object.keys(comp)[0]],
                 });
             }
         });
@@ -97,16 +99,18 @@ function Parse(dataPath) {
     }
     var writeDist = path_1.default.dirname(dataPath);
     var writeResultName = path_1.default.basename(dataPath).replace(path_1.default.extname(dataPath), '');
-    fs_1.default.writeFileSync(path_1.default.join(writeDist, writeResultName + ".json"), json_stringify_pretty_compact_1.default(tree, { maxLength: 120 }));
+    fs_1.default.writeFileSync(path_1.default.join(writeDist, writeResultName + ".json"), json_stringify_pretty_compact_1.default({ name: writeResultName, children: tree }, { maxLength: 120 }));
 }
 function main() {
     var path = path_2.assetPath;
     var stream = folder_walker_1.default([path]);
     var dict = {};
+    console.log('start');
     stream.on('data', function (data) {
         if (data.type === 'file') {
             var extname = path_1.default.extname(data.filepath);
             if (extname === '.unity' || extname === '.prefab') {
+                console.log('begin: ' + data.filepath);
                 Parse(data.filepath);
                 console.log('complete: ' + data.filepath);
             }

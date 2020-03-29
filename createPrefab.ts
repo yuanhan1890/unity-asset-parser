@@ -19,7 +19,7 @@ function Parse(dataPath: string) {
 
   const str = fs.readFileSync(dataPath, { encoding: 'utf-8' });
 
-  const  lines = str.split(/---\s+\!u\!(\d+)\s+\&(\d+)/g);
+  const lines = str.split(/---\s+\!u\!(\d+)\s+\&(\d+)/g);
   const IdDict = {} as { [key in string]: any };
 
   for (let i = 1; i < lines.length; i += 3) {
@@ -104,11 +104,13 @@ function Parse(dataPath: string) {
           script,
           id: monoBehaviour.__id,
           name: compName,
+          properties: monoBehaviour,
         });
       } else {
         fn.push({
           id: comp[Object.keys(comp)[0]].__id,
           name: compName,
+          properties: comp[Object.keys(comp)[0]],
         });
       }
     });
@@ -127,7 +129,7 @@ function Parse(dataPath: string) {
 
   fs.writeFileSync(
     pathLib.join(writeDist, `${writeResultName}.json`),
-    stringify(tree, { maxLength: 120 }),
+    stringify({ name: writeResultName, children: tree }, { maxLength: 120 }),
   );
 }
 
@@ -137,10 +139,13 @@ function main() {
 
   const dict: any = {};
 
+  console.log('start');
+
   stream.on('data', (data: IWalker) => {
     if (data.type === 'file') {
       const extname = pathLib.extname(data.filepath);
       if (extname === '.unity' || extname === '.prefab') {
+        console.log('begin: ' + data.filepath);
         Parse(data.filepath);
         console.log('complete: ' + data.filepath);
       }
