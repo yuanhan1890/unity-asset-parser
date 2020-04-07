@@ -6,6 +6,7 @@
     ],
     "jsRules": {},
     "rules": {
+        "align": false,
         "import-name": false,
         "function-name": false,
         "variable-name": false,

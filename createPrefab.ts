@@ -4,6 +4,7 @@ import jsYaml from 'js-yaml';
 import stringify from 'json-stringify-pretty-compact';
 import walker from 'folder-walker';
 import { assetPath, assetMetaLookupPath } from './path';
+import { sortKeysDeepBy } from './sortKeysDeepBy';
 const guidDict: any = require(assetMetaLookupPath);
 
 interface IWalker {
@@ -102,16 +103,21 @@ function Parse(dataPath: string) {
       const monoBehaviour = comp.MonoBehaviour;
       if (monoBehaviour) {
         const guid = monoBehaviour.m_Script.guid;
-        const script = guidDict[guid];
+        let script = guidDict[guid];
+        script = script ? script : 'UnknownScript';
+        const scriptName = script ? pathLib.basename(script) : 'Unknown';
 
+        const loc = newParent.join(' > ') + ` > [${scriptName}]`;
         fn.push({
           script,
           id: monoBehaviour.__id,
           name: compName,
           properties: monoBehaviour,
-          loc: newParent.join(' > ') + ` > [${compName}]`,
+          // loc: newParent.join(' > ') + ` > [${compName}]`,
+          loc,
         });
-        fileIdMapper[monoBehaviour.__id] = newParent.join(' > ') + ` > [${compName}]`;
+        // fileIdMapper[monoBehaviour.__id] = newParent.join(' > ') + ` > [${compName}]`;
+        fileIdMapper[monoBehaviour.__id] = loc;
       } else {
         fn.push({
           id: comp[Object.keys(comp)[0]].__id,
@@ -173,9 +179,23 @@ function Parse(dataPath: string) {
 
   resolveFildId(tree);
 
+  const json = sortKeysDeepBy({ name: writeResultName, children: tree }, ['ASC'], {
+    orderOverride: [
+      'id',
+      'name',
+      'loc',
+      'script',
+      'properties',
+      'fn',
+      'children',
+      'endName',
+    ],
+  }, 'alphabetical');
+  const textContent = stringify(json, { maxLength: 120 });
+
   fs.writeFileSync(
     pathLib.join(writeDist, `${writeResultName}.json`),
-    stringify({ name: writeResultName, children: tree }, { maxLength: 120 }),
+    textContent,
   );
 }
 

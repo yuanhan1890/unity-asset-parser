@@ -7,13 +7,14 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-meta": "cross-env tsc && node createMetaLookup.js",
     "create-prefab": "cross-env tsc && node createPrefab.js",
-    "build": "cross-env tsc && node createMetaLookup.js && node createPrefab"
+    "build": "cross-env tsc && node createMetaLookup.js && node createPrefab.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/js-yaml": "^3.12.2",
+    "@types/lodash": "^4.14.149",
     "@types/node": "^13.7.7",
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",
